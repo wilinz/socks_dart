@@ -1,3 +1,7 @@
+## 2.1.1
+
+- Fix domain serialization issue (thx @sylvieon).
+
 ## 2.1.0
 
 - Added `bindSecure` method to `SocksServer`, used to create socks server behind SSL(TLS).
