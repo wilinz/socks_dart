@@ -62,20 +62,10 @@ class SocksTCPClient extends SocksSocket {
     int port,
   ) async {
     final InternetAddress address;
-    if (host.type == InternetAddressType.unix) {
-      // When the proxy transport is a Unix socket, keep the target as a
-      // domain-type address (ATYP=0x03) so the proxy server resolves DNS.
-      // Otherwise resolve locally and send an IP (ATYP=0x01/0x04).
-      final proxyIsUnix = proxies.isNotEmpty &&
-          proxies.first.host is InternetAddress &&
-          (proxies.first.host as InternetAddress).type ==
-              InternetAddressType.unix;
-      address = proxyIsUnix
-          ? host // stays unix-type → _handleCommand sends ATYP=0x03
-          : (await InternetAddress.lookup(host.address))[0];
-    } else {
+    if(host.type == InternetAddressType.unix)
+      address = (await InternetAddress.lookup(host.address))[0];
+    else 
       address = host;
-    }
 
     final client = await SocksSocket.initialize(proxies, address, port, SocksConnectionType.connect);
     return client.socket;
