@@ -56,18 +56,19 @@ class SocksTCPClient extends SocksSocket {
   }
 
   /// Connects proxy client to given [proxies] with exit point of [host]\:[port].
+  ///
+  /// When [host] is an IP-typed [InternetAddress] it is sent as ATYP=0x01/0x04.
+  /// When [host] is unix-typed (used as a sentinel for hostnames by
+  /// [assignToHttpClient]), the hostname bytes are forwarded as ATYP=0x03 so
+  /// the proxy server resolves DNS — required for proxies that route by domain
+  /// (e.g. sing-box `domain_suffix` rules).
   static Future<SocksSocket> connect(
     List<ProxySettings> proxies,
     InternetAddress host,
     int port,
   ) async {
-    final InternetAddress address;
-    if(host.type == InternetAddressType.unix)
-      address = (await InternetAddress.lookup(host.address))[0];
-    else 
-      address = host;
-
-    final client = await SocksSocket.initialize(proxies, address, port, SocksConnectionType.connect);
+    final client = await SocksSocket.initialize(
+        proxies, host, port, SocksConnectionType.connect);
     return client.socket;
   }
 }
