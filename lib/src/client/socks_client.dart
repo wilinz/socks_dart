@@ -169,7 +169,18 @@ class SocksSocket with StreamMixin<Uint8List>, SocketMixin, ByteReader {
     final target = await resolveAddress(targetAddress);
     final addressType =
         AddressType.internetAddressTypeMap[target.type]!;
-    final rawAddress = target.rawAddress;
+    var rawAddress = target.rawAddress;
+
+    // dart:io stores unix-typed InternetAddress paths as null-terminated
+    // C-strings (see FileSystemEntity._toNullTerminatedUtf8Array). When the
+    // unix-type is being abused as a hostname sentinel for ATYP=0x03 domain,
+    // strip the trailing NUL so the proxy server doesn't see an unresolvable
+    // "host\0".
+    if (addressType == AddressType.domain &&
+        rawAddress.isNotEmpty &&
+        rawAddress.last == 0) {
+      rawAddress = rawAddress.sublist(0, rawAddress.length - 1);
+    }
 
     add(
       Uint8List.fromList([
