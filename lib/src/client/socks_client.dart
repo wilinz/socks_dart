@@ -57,14 +57,7 @@ class SocksSocket with StreamMixin<Uint8List>, SocketMixin, ByteReader {
     if(proxies.isEmpty)
       throw ArgumentError.value(proxies, 'proxies', 'empty');
 
-    final Socket socket;
-    final _firstProxy = proxies.first;
-    if (_firstProxy.host is InternetAddress &&
-        (_firstProxy.host as InternetAddress).type == InternetAddressType.unix) {
-      socket = await Socket.connect(_firstProxy.host as InternetAddress, 0);
-    } else {
-      socket = await Socket.connect(_firstProxy.host, _firstProxy.port);
-    }
+    final socket = await Socket.connect(proxies.first.host, proxies.first.port);
   
     final client = SocksSocket.protected(socket, type);
     await client._handshake(proxies.first);
