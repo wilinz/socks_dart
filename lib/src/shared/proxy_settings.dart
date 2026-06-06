@@ -1,13 +1,15 @@
 import 'dart:io';
 
+/// Stores information to connect to socks server.
 class ProxySettings {
   /// Creates proxy settings object
   ProxySettings(
     this.host,
     this.port, {
-    this.password,
-    this.username,
-  });
+      this.password,
+      this.username,
+      this.context,
+    });
 
   /// Proxy host
   /// [host] can either be a [String] or an [InternetAddress]. If [host] is a
@@ -25,6 +27,9 @@ class ProxySettings {
 
   /// Proxy username
   final String? username;
+
+  /// Context to establish TLS.
+  final SecurityContext? context;
 
   @override
   String toString() {

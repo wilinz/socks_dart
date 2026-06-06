@@ -1,5 +1,3 @@
-library socks5;
-
+export 'enums.dart';
 export 'socks_client.dart';
-export 'socks_enums.dart';
 export 'socks_server.dart';

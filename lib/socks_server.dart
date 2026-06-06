@@ -1,4 +1,9 @@
-library socks5.server;
+/// {@canonicalFor auth_handler.AuthHandler}
+/// {@canonicalFor socks_udp_packet.SocksUpdPacket}
+/// {@canonicalFor connection.Connection}
+/// {@canonicalFor tcp_connection.TcpConnection}
+/// {@canonicalFor udp_connection.UdpConnection}
+library;
 
 export 'src/server/auth_handler.dart';
 export 'src/server/connection.dart';

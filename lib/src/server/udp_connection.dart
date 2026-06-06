@@ -9,10 +9,11 @@ import '../shared/socks_udp_client_bound_socket.dart';
 import '../shared/socks_udp_packet.dart';
 import 'connection.dart';
 import 'socks_connection.dart';
+import 'socks_server.dart';
 
+/// Connected client connection emitted by [SocksServer] if client requested UDP connection.
 class UdpConnection extends SocksConnection implements Connection {
-  UdpConnection(this.connection)
-      : super(connection, connection.authHandler) {
+  UdpConnection(this.connection, {super.authHandler, super.lookup}) : super(connection) {
     absorbConnection(connection);
   }
 
@@ -35,7 +36,7 @@ class UdpConnection extends SocksConnection implements Connection {
       0x01, // IPv4 
       0x00, 0x00, 0x00, 0x00, // 0.0.0.0
       // Convert short port to big endian byte list.
-      (clientBoundSocket.port & 0xff00) >> 8, clientBoundSocket.port & 0xff
+      (clientBoundSocket.port & 0xff00) >> 8, clientBoundSocket.port & 0xff,
     ]);
     await flush();
 
