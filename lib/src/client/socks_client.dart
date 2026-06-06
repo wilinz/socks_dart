@@ -6,7 +6,6 @@ import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 
 import '../../exceptions.dart';
-import '../address_resolve.dart';
 import '../address_type.dart';
 import '../enums/authentication_method.dart';
 import '../enums/command_reply_code.dart';
@@ -76,7 +75,7 @@ class SocksSocket with StreamMixin<Uint8List>, SocketMixin, ByteReader {
       await client._handshake(proxies.first);
 
       for(var i = 1; i < proxies.length; i++) {
-        await client._handleCommand(proxies[i].host, proxies[i].port, SocksConnectionType.connect);
+        await client._handleCommand(proxies[i].host as InternetAddress, proxies[i].port, SocksConnectionType.connect);
         final response = await client._handleCommandResponse(SocksConnectionType.connect);
         if(response.address != InternetAddress('0.0.0.0') || response.port != 0) {
           throw UnimplementedError('Connect associated proxy not yet implemented.');
@@ -180,25 +179,13 @@ class SocksSocket with StreamMixin<Uint8List>, SocketMixin, ByteReader {
 
   /// Handle socks command.
   Future<void> _handleCommand(
-    dynamic targetAddress,
+    InternetAddress targetAddress,
     int targetPort,
     SocksConnectionType type,
   ) async {
-    final target = await resolveAddress(targetAddress);
     final addressType =
-        AddressType.internetAddressTypeMap[target.type]!;
-    var rawAddress = target.rawAddress;
-
-    // dart:io stores unix-typed InternetAddress paths as null-terminated
-    // C-strings (see FileSystemEntity._toNullTerminatedUtf8Array). When the
-    // unix-type is being abused as a hostname sentinel for ATYP=0x03 domain,
-    // strip the trailing NUL so the proxy server doesn't see an unresolvable
-    // "host\0".
-    if (addressType == AddressType.domain &&
-        rawAddress.isNotEmpty &&
-        rawAddress.last == 0) {
-      rawAddress = rawAddress.sublist(0, rawAddress.length - 1);
-    }
+        AddressType.internetAddressTypeMap[targetAddress.type]!;
+    final rawAddress = targetAddress.rawAddress;
 
     add(
       Uint8List.fromList([
@@ -207,9 +194,7 @@ class SocksSocket with StreamMixin<Uint8List>, SocketMixin, ByteReader {
         0x00, // Reserved
         addressType.byte,
         // Encoding address, if domain adding length at the beginning.
-        // rawAddress is already NUL-free (stripped above), so emit it verbatim.
-        if (addressType == AddressType.domain) rawAddress.length,
-        ...rawAddress,
+        ...(addressType == AddressType.domain ? [rawAddress.length - 1, ...rawAddress.sublist(0, rawAddress.length - 1)] : rawAddress),
         // Encoding port as big endian short.
         (targetPort & 0xff00) >> 8, targetPort & 0x00ff,
       ]),

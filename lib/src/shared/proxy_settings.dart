@@ -11,12 +11,13 @@ class ProxySettings {
       this.context,
     });
 
-  /// Proxy host
-  /// [host] can either be a [String] or an [InternetAddress]. If [host] is a
-  /// [String], [connect] will perform a [InternetAddress.lookup] and try
-  /// all returned [InternetAddress]es, until connected. Unless a
-  /// connection was established, the error from the first failing connection is
-  /// returned.
+  /// Proxy host.
+  ///
+  /// Can be a [String] or an [InternetAddress]. When it is a [String], the
+  /// first-hop connection is made with `Socket.connect`, which resolves the
+  /// hostname lazily (trying each resolved address) — this lets a domain proxy
+  /// host work without a separate, up-front DNS lookup. Note that proxy
+  /// chaining and the UDP server path still require an [InternetAddress].
   final dynamic host;
 
   /// Proxy port
